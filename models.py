@@ -44,7 +44,7 @@ class Stock(Base):
     sale = relationship("Sale", back_populates="stock")
 
     def __str__(self):
-        return f"Количество добавлено с id {self.id} для книги с id {self.id_book} и магазина с id {self.id_shop}"
+        return f"Количество {self.count} добавлено с id {self.id} для книги с id {self.id_book} и магазина с id {self.id_shop}"
 
 
 class Shop(Base):
@@ -56,7 +56,7 @@ class Shop(Base):
     stock = relationship(Stock, back_populates="shops")
 
     def __str__(self):
-        return f"Магазин добавлен с id {self.id}"
+        return f"Магазин {self.name} добавлен с id {self.id}"
 
 
 class Sale(Base):
@@ -71,7 +71,7 @@ class Sale(Base):
     stock = relationship(Stock, back_populates="sale")
 
     def __str__(self):
-        return f"Скидка  с id {self.id} по цене {self.price} добавлена с даты {self.date_sale} для {self.count} книг."
+        return f"Скидка с id {self.id} по цене {self.price} добавлена с даты {self.date_sale} для {self.count} книг."
 
 
 def create_tables(engine):

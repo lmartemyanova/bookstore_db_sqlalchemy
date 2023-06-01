@@ -6,12 +6,65 @@ from dotenv import load_dotenv, find_dotenv
 from models import Publisher, Book, Stock, Shop, Sale, create_tables
 
 
-def fill_tables_from_json(data_json=os.getcwd()):
-    with open(data_json, encoding="utf-8") as f:
+def fill_tables_from_json():
+    path = os.path.join(os.getcwd(), "tests_data.json")
+    with open(path, encoding="utf-8") as f:
         json_data = json.load(f)
         models = json_data
         for model in models:
-            new_model = model[model]
+            # models = {
+            #     'publisher': Publisher(id=model['pk'], name=model['fields']['name']),
+            #     'book': Book(id=model['pk'], title=model['fields']['title'], id_publisher=model['fields']['publisher']),
+            #     'shop': Shop(id=model['pk'], name=model['fields']['name']),
+            #     'stock': Stock(id=model['pk'], id_shop=model['fields']['shop'], id_book=model['fields']['book'],
+            #                    count=model['fields']['count']),
+            #     'sale': Sale(id=model['pk'], price=model['fields']['price'], date_sale=model['fields']['date_sale'],
+            #                  count=model['fields']['count'], id_stock=model['fields']['stock'])
+            # }
+            if model['model'] == 'publisher':
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                new_publisher = Publisher(id=model['pk'], name=model['fields']['name'])
+                session.add(new_publisher)
+                session.commit()
+                print(new_publisher)
+                session.close()
+            elif model['model'] == 'book':
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                new_book = Book(id=model['pk'], title=model['fields']['title'],
+                                id_publisher=model['fields']['publisher'])
+                session.add(new_book)
+                session.commit()
+                print(new_book)
+                session.close()
+            elif model['model'] == 'shop':
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                new_shop = Shop(id=model['pk'], name=model['fields']['name'])
+                session.add(new_shop)
+                session.commit()
+                print(new_shop)
+                session.close()
+            elif model['model'] == 'stock':
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                new_stock = Stock(id=model['pk'], id_shop=model['fields']['shop'], id_book=model['fields']['book'],
+                                  count=model['fields']['count'])
+                session.add(new_stock)
+                session.commit()
+                print(new_stock)
+                session.close()
+            elif model['model'] == 'sale':
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                new_sale = Sale(id=model['pk'], price=model['fields']['price'], date_sale=model['fields']['date_sale'],
+                                count=model['fields']['count'], id_stock=model['fields']['stock'])
+                session.add(new_sale)
+                session.commit()
+                print(new_sale)
+                session.close()
+    return
 
 
 def create_publisher():
@@ -120,8 +173,7 @@ if __name__ == '__main__':
         if command == "1":
             fill_tables_by_input()
         elif command == "2":
-            data_json = os.path.abspath(input("Введите путь к файлу: "))
-            fill_tables_from_json(data_json)
+            # data_json = os.path.abspath(input("Введите путь к файлу: "))
+            fill_tables_from_json()
         else:
             print("Неверная команда.")
-
