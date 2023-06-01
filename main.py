@@ -29,8 +29,7 @@ def create_book():
     Session = sessionmaker(bind=engine)
     session = Session()
     new_book = Book(title=input("Введите название книги: "),
-                    id_publisher=int(input("Введите id автора: ")),
-                    stock=int(input("Введите id склада: ")))
+                    id_publisher=int(input("Введите id автора: ")))
     session.add(new_book)
     session.commit()
     print(new_book)
@@ -43,7 +42,7 @@ def create_stock():
     session = Session()
     new_stock = Stock(id_book=int(input("Введите id книги: ")),
                       count=int(input("Введите количество книг на складе: ")),
-                      shop_id=int(input("Введите id магазина: ")))
+                      id_shop=int(input("Введите id магазина: ")))
     session.add(new_stock)
     session.commit()
     print(new_stock)
@@ -54,8 +53,7 @@ def create_stock():
 def create_shop():
     Session = sessionmaker(bind=engine)
     session = Session()
-    new_shop = Shop(name=input("Введите название магазина: "),
-                    stock=int(input("Введите id склада: ")))
+    new_shop = Shop(name=input("Введите название магазина: "))
     session.add(new_shop)
     session.commit()
     print(new_shop)
@@ -79,20 +77,28 @@ def create_sale():
 
 def fill_tables_by_input():
     print("""
-    
+    Для заполнения таблицы введите команду:
+    "p": таблица publisher,
+    "b": таблица book,
+    "st": таблица stock,
+    "sh": таблица shop,
+    "sa": таблица sale,
+    "q": выход из программы.
     """)
     commands = {
         "p": create_publisher,
         "b": create_book,
         "st": create_stock,
         "sh": create_shop,
-        "sa": create_sale,
-        "q": False
+        "sa": create_sale
     }
-    while True:
+    run = True
+    while run:
         command = input("Какую таблицу вы хотите заполнить? ").lower()
         if command in commands.keys():
             commands[command]()
+        elif command == "q":
+            run = False
         else:
             print("Вы ввели неправильную команду.")
 
@@ -108,8 +114,6 @@ if __name__ == '__main__':
     create_tables(engine)
 
     while True:
-        # Session = sessionmaker(bind=engine)
-        # session = Session()
         print("Введите 1, если Вы хотите заполнить таблицы вручную. "
               "Введите 2 для автоматического заполнения из json-файла.")
         command = input("Как вы хотите заполнить таблицы? ")
@@ -118,5 +122,6 @@ if __name__ == '__main__':
         elif command == "2":
             data_json = os.path.abspath(input("Введите путь к файлу: "))
             fill_tables_from_json(data_json)
+        else:
+            print("Неверная команда.")
 
-    session.close()
