@@ -1,98 +1,100 @@
 import json
-import sqlalchemy
 import sqlalchemy as sq
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv, find_dotenv
-
-Base = declarative_base()
-
-
-class Publisher(Base):
-    __tablename__ = "publisher"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    name = sq.Column(sq.String(length=200), unique=True, nullable=False)
-
-    books = relationship("Book", back_populates="publisher")
-
-    def __str__(self):
-        return f"{self.id}: {self.name}"
-
-
-class Book(Base):
-    __tablename__ = "book"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    title = sq.Column(sq.String(length=250))
-    id_publisher = sq.Column(sq.Integer, sq.ForeignKey("publisher.id"), nullable=False)
-
-    publisher = relationship(Publisher, back_populates="books")
-    stock = relationship("Stock", back_populates="book")
-
-
-class Stock(Base):
-    __tablename__ = "stock"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    id_book = sq.Column(sq.Integer, sq.ForeignKey('book.id'), nullable=False)
-    id_shop = sq.Column(sq.Integer, sq.ForeignKey('shop.id'), nullable=False)
-    count = sq.Column(sq.Integer)
-
-    book = relationship(Book, back_populates="stock")
-    shop = relationship("Shop", back_populates="stock")
-
-
-class Shop(Base):
-    __tablename__ = "shop"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    name = sq.Column(sq.String(length=250), unique=True, nullable=False)
-
-    stock = relationship(Stock, back_populates="shop")
-
-
-class Sale(Base):
-    __tablename__ = "sale"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    price = sq.Column(sq.Numeric)
-    date_sale = sq.Column(sq.Date, nullable=False)
-    id_stock = sq.Column(sq.Integer, sq.ForeignKey("stock.id"))
-    count = sq.Column(sq.Integer)
-
-    # stock = relationship(Stock, back_populates="sale")
-
-
-def create_tables(engine):
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+from models import Publisher, Book, Stock, Shop, Sale, create_tables
 
 
 def fill_tables_from_json(data_json=os.getcwd()):
     with open(data_json, encoding="utf-8") as f:
         json_data = json.load(f)
+        models = json_data
+        for model in models:
+            new_model = model[model]
+
+
+def create_publisher():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_publisher = Publisher(name=input("Введите имя автора: "))
+    session.add(new_publisher)
+    session.commit()
+    print(new_publisher)
+    session.close()
+    return
+
+
+def create_book():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_book = Book(title=input("Введите название книги: "),
+                    id_publisher=int(input("Введите id автора: ")),
+                    stock=int(input("Введите id склада: ")))
+    session.add(new_book)
+    session.commit()
+    print(new_book)
+    session.close()
+    return
+
+
+def create_stock():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_stock = Stock(id_book=int(input("Введите id книги: ")),
+                      count=int(input("Введите количество книг на складе: ")),
+                      shop_id=int(input("Введите id магазина: ")))
+    session.add(new_stock)
+    session.commit()
+    print(new_stock)
+    session.close()
+    return
+
+
+def create_shop():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_shop = Shop(name=input("Введите название магазина: "),
+                    stock=int(input("Введите id склада: ")))
+    session.add(new_shop)
+    session.commit()
+    print(new_shop)
+    session.close()
+    return
+
+
+def create_sale():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_sale = Sale(price=float(input("Введите цену: ")),
+                    date_sale=input("Введите дату скидки: "),
+                    count=input("Введите количество: "),
+                    id_stock=input("Введите id склада: "))
+    session.add(new_sale)
+    session.commit()
+    print(new_sale)
+    session.close()
+    return
 
 
 def fill_tables_by_input():
-    publisher = Publisher(name=input("Введите название издателя: "))
-    # print(f"Автор добавлен с id {publisher.id}")
-    book = Book(title=input("Введите название книги: "))
-    # print(f"Книга добавлена с id {book.id}")
-    stock = Stock(count=input("Введите количество книг на складе: "))
-    # print(f"Количество добавлено с id {stock.id} для книги с id {stock.id_book} и магазина с id {stock.id_shop}")
-    shop = Shop(name=input("Введите название магазина: "))
-    # print(f"Магазин добавлен с id {shop.id}")
-    sale = Sale(
-        price=input("Введите цену: "),
-        date_sale=input("Введите дату скидки: "),
-        count=input("Введите количество экземпляров со скидкой: ")
-    )
-    # print(f"Скидка добавлена с id {sale.id}")
-
-    session.add_all([publisher, book, stock, shop, sale])
-    session.commit()
-    print(publisher.id, book.id, stock.id, shop.id, sale.id)
+    print("""
+    
+    """)
+    commands = {
+        "p": create_publisher,
+        "b": create_book,
+        "st": create_stock,
+        "sh": create_shop,
+        "sa": create_sale,
+        "q": False
+    }
+    while True:
+        command = input("Какую таблицу вы хотите заполнить? ").lower()
+        if command in commands.keys():
+            commands[command]()
+        else:
+            print("Вы ввели неправильную команду.")
 
 
 if __name__ == '__main__':
@@ -106,8 +108,8 @@ if __name__ == '__main__':
     create_tables(engine)
 
     while True:
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        # Session = sessionmaker(bind=engine)
+        # session = Session()
         print("Введите 1, если Вы хотите заполнить таблицы вручную. "
               "Введите 2 для автоматического заполнения из json-файла.")
         command = input("Как вы хотите заполнить таблицы? ")
