@@ -1,8 +1,10 @@
 import json
+import os
+
+from dotenv import load_dotenv, find_dotenv
 import sqlalchemy as sq
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv, find_dotenv
+
 from models import Publisher, Book, Stock, Shop, Sale, create_tables
 
 
