@@ -24,11 +24,23 @@ class Book(Base):
     title = sq.Column(sq.String(length=250), nullable=False)
     id_publisher = sq.Column(sq.Integer, sq.ForeignKey("publisher.id", ondelete='CASCADE'), nullable=False)
 
-    publisher = relationship(Publisher, back_populates="books")
-    stock = relationship("Stock", back_populates="books")
+    publisher = relationship("Publisher", back_populates="books")
+    stocks = relationship("Stock", back_populates="book")
 
     def __str__(self):
         return f"Книга {self.title} добавлена с id {self.id}"
+
+
+class Shop(Base):
+    __tablename__ = "shop"
+
+    id = sq.Column(sq.Integer, primary_key=True)
+    name = sq.Column(sq.String(length=250), unique=True, nullable=False)
+
+    stocks = relationship("Stock", back_populates="shop")
+
+    def __str__(self):
+        return f"Магазин {self.name} добавлен с id {self.id}"
 
 
 class Stock(Base):
@@ -39,24 +51,12 @@ class Stock(Base):
     id_shop = sq.Column(sq.Integer, sq.ForeignKey('shop.id', ondelete='CASCADE'), nullable=False)
     count = sq.Column(sq.Integer)
 
-    books = relationship(Book, back_populates="stock")
-    shops = relationship("Shop", back_populates="stock")
-    sale = relationship("Sale", back_populates="stock")
+    book = relationship("Book", back_populates="stocks")
+    shop = relationship("Shop", back_populates="stocks")
+    sales = relationship("Sale", back_populates="stock")
 
     def __str__(self):
         return f"Количество {self.count} добавлено с id {self.id} для книги с id {self.id_book} и магазина с id {self.id_shop}"
-
-
-class Shop(Base):
-    __tablename__ = "shop"
-
-    id = sq.Column(sq.Integer, primary_key=True)
-    name = sq.Column(sq.String(length=250), unique=True, nullable=False)
-
-    stock = relationship(Stock, back_populates="shops")
-
-    def __str__(self):
-        return f"Магазин {self.name} добавлен с id {self.id}"
 
 
 class Sale(Base):
@@ -68,7 +68,7 @@ class Sale(Base):
     id_stock = sq.Column(sq.Integer, sq.ForeignKey("stock.id", ondelete='CASCADE'))
     count = sq.Column(sq.Integer)
 
-    stock = relationship(Stock, back_populates="sale")
+    stock = relationship("Stock", back_populates="sales")
 
     def __str__(self):
         return f"Скидка с id {self.id} по цене {self.price} добавлена с даты {self.date_sale} для {self.count} книг."
